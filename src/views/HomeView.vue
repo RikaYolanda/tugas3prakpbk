@@ -12,19 +12,19 @@
       <button @click="filterTodos('completed')" class="filter-btn">Completed</button>
     </div>
     <ul class="todo-list">
-      <li v-for="(todo, index) in filteredTodos" :key="index">
-        <input type="checkbox" v-model="todo.done" />
-        <span :class="{ 'done': todo.done }">{{ todo.text }}</span>
-        <button @click="removeTodo(index)" class="danger">Remove</button>
-      </li>
-    </ul>
+  <li v-for="(todo, index) in filteredTodos" :key="index">
+    <input type="checkbox" v-model="todo.done" />
+    <span :class="{ 'done': todo.done, 'editing': todo.editing }" @dblclick="editTodo(index)">{{ todo.text }}</span>
+    <input v-if="todo.editing" type="text" v-model="editedTodoText" @blur="saveEditedTodo(index)" @keyup.enter="saveEditedTodo(index)" @keyup.esc="cancelEdit(index)" />
+    <button @click="removeTodo(index)" class="danger">Remove</button>
+    <button @click="editTodo(index)" class="edit">Edit</button> <!-- Tambahkan tombol edit -->
+  </li>
+</ul>
     <footer>
-      <p>Created by Yola!</p>
+      <p>Created by yola</p>
     </footer>
   </div>
 </template>
-
-
 
 <script>
 export default {
@@ -33,6 +33,7 @@ export default {
       newTodo: '',
       todos: [],
       filter: 'all',
+      editedTodoText: '',
     };
   },
   methods: {
@@ -43,6 +44,7 @@ export default {
       this.todos.push({
         text: this.newTodo,
         done: false,
+        editing: false
       });
       this.newTodo = '';
     },
@@ -52,6 +54,23 @@ export default {
     filterTodos(filterType) {
       this.filter = filterType;
     },
+    editTodo(index) {
+      this.editedTodoText = this.todos[index].text;
+      this.todos[index].editing = true;
+    },
+    saveEditedTodo(index) {
+      if (this.editedTodoText.trim().length === 0) {
+        this.todos.splice(index, 1);
+      } else {
+        this.todos[index].text = this.editedTodoText;
+        this.todos[index].editing = false;
+      }
+      this.editedTodoText = '';
+    },
+    cancelEdit(index) {
+      this.todos[index].editing = false;
+      this.editedTodoText = '';
+    }
   },
   computed: {
     filteredTodos() {
@@ -66,19 +85,18 @@ export default {
     },
   },
 };
-
-
 </script>
 
 <style>
 /* General Styles */
-body { color: black;
-  font-family: "Dancing Script", cursive; /* Elegant cursive font */
+body {
+  color: black;
+  font-family: "Dancing Script", cursive;
   margin: 0;
-  background-image: url(/src/assets/aes.jpeg); 
+  background-image: url(/src/assets/aes.jpeg);
   background: cover;
-background-size: cover;
-background-repeat: no-repeat; /* Light pink background */
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 /* Todo List Container */
@@ -87,14 +105,14 @@ background-repeat: no-repeat; /* Light pink background */
   margin: 40px auto;
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  background-color: #fff; /* White background for clear text */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
 }
 
 /* Heading */
 .todo-app h1 {
   text-align: center;
-  color: #9933cc; /* Light purple heading */
+  color: #9933cc;
   font-size: 2rem;
   margin-bottom: 20px;
 }
@@ -107,20 +125,36 @@ background-repeat: no-repeat; /* Light pink background */
 
 .todo-app input[type=text] {
   flex: 1;
-  padding: 15px 20px; /* Increase padding for a more spacious feel */
+  padding: 15px 20px;
   font-size: 1.2rem;
   border: 1px solid #ddd;
   border-radius: 5px;
   outline: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inset shadow for a touch of depth */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .todo-app button[type=submit] {
   margin-left: 10px;
   padding: 10px 20px;
   font-size: 1.2rem;
-  background-color: #e0b2ff; /* Light purple button */
-  color: #fff; /* White button */
+  background-color: #e0b2ff;
+  color: #fff;
 }
 
+.todo-list li {
+  position: relative;
+}
+
+.todo-list input[type=checkbox] {
+  position: absolute;
+  left: -40px;
+}
+
+.todo-list .editing {
+  display: none;
+}
+
+.todo-list .editing + button {
+  display: none;
+}
 </style>
